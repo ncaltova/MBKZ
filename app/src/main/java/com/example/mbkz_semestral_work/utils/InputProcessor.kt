@@ -23,9 +23,29 @@ class InputProcessor {
     private val inputQueue: Queue<MotionEvent> = LinkedList()
 
     /**
-     * Fetches input from the unprocessed queue
+     * Add new input to the queue
      */
-    fun getInput() : Input? {
+    fun addInput(event: MotionEvent) : Boolean {
+        return inputQueue.offer(event)
+    }
+
+    /**
+     * Return all pending inputs as iterable list
+     */
+    fun getPendingInput(): MutableList<Input>{
+        var pending : Input? = this.getInput()
+
+        val result : MutableList<Input> = mutableListOf()
+
+        while (pending != null) {
+            result.add(pending)
+            pending = this.getInput()
+        }
+
+        return result
+    }
+
+    private fun getInput() : Input? {
 
         if (inputQueue.isEmpty()) return null
 
@@ -36,19 +56,13 @@ class InputProcessor {
         return input
     }
 
-    /**
-     * Add new input to the queue
-     */
-    fun addInput(event: MotionEvent) : Boolean {
-        return inputQueue.offer(event)
-    }
-
     private fun getEventType(event : MotionEvent) : Input {
         return when(event.action) {
-            MotionEvent.ACTION_DOWN -> Input(event.x, event.y, InputType.DOWN)
+            MotionEvent.ACTION_DOWN -> Input(event.x, event.y, InputType.CLICK)
             MotionEvent.ACTION_UP ->
-                if (hypot(lastInput!!.x - event.x, lastInput!!.y - event.y) <= CLICK_MOTION_LIMIT)
+                if (lastInput != null && hypot(lastInput!!.x - event.x, lastInput!!.y - event.y) <= CLICK_MOTION_LIMIT)
                         Input(event.x, event.y, InputType.CLICK)
+                else if (lastInput == null) Input(event.x, event.y, InputType.CLICK)
                 else Input(event.x, event.y, InputType.LIFT)
             else -> Input(event.x, event.y, InputType.UNKNOWN)
         }
@@ -56,7 +70,7 @@ class InputProcessor {
 
     private fun updateLastInput(input: Input) {
         lastInput = when (input.type) {
-            InputType.DOWN -> input
+            InputType.CLICK -> input
             else -> null
         }
     }
@@ -69,5 +83,5 @@ class Input (_x : Float, _y : Float, _type: InputType) {
 }
 
 enum class InputType {
-    CLICK, LIFT, DOWN, UNKNOWN
+    CLICK, LIFT, UNKNOWN
 }

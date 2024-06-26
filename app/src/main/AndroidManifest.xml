@@ -14,7 +14,9 @@
         tools:targetApi="34">
         <activity
             android:name=".GameActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:label="@string/title_activity_game"
+            android:theme="@style/Theme.MBKZ_Semestral_Work" />
         <activity
             android:name=".MainMenu"
             android:exported="true"

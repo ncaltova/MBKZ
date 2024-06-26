@@ -1,23 +1,27 @@
 package com.example.mbkz_semestral_work
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
-import android.view.MotionEvent
+import androidx.appcompat.app.AppCompatActivity
 
 class GameActivity : AppCompatActivity() {
 
-    /**
-     * Game loop handling user input and updating
-     */
-    private val gameLoop = GameLoop(this)
+    private lateinit var gameView: GameView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game)
+
+        gameView = GameView(this)
+        setContentView(gameView)
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        // gameLoop.updateInput(event) TODO
-        return true
+    /**
+     * Save game state on application pause
+     */
+    override fun onPause() {
+        this.gameView.cacheHighScore(gameView.game?.getScore())
+        gameView.game?.clearScore()
+        super.onPause()
     }
+
 }

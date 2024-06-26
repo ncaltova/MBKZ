@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MBKZ_Semestral_Work</string>
+    <string name="title_activity_game">GameActivity</string>
 </resources>

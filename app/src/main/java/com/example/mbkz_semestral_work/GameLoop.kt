@@ -1,5 +1,7 @@
 package com.example.mbkz_semestral_work
 
+import android.annotation.SuppressLint
+import android.graphics.Canvas
 import android.view.MotionEvent
 import com.example.mbkz_semestral_work.utils.InputProcessor
 import java.lang.Exception
@@ -10,22 +12,41 @@ import kotlin.random.Random
 
 private const val DEFAULT_FPS = 30
 
-class GameLoop(private val context: GameActivity) : Thread("GameLoopThread ${Random.nextInt()}") {
-
-    private val view = GameView(context)
+class GameLoop(private val view: GameView) : Thread("GameLoopThread ${Random.nextInt()}") {
 
     var running: Boolean = false
 
+    var time: Long = 0
+
+    private var score = 0
+
+    @SuppressLint("WrongCall")
     override fun run() {
-        val fps = context.baseContext.display?.refreshRate
+        val fps = view.context.display?.refreshRate
         val ticks = if (fps == null) 1000/DEFAULT_FPS else 1000/fps.roundToInt()
+
+        var c: Canvas? = null
+
+        time = System.currentTimeMillis()
 
         while (running) {
             val start = System.currentTimeMillis()
 
             try {
-                // TODO prekreslit hru
+                c = view.holder.lockCanvas()
+
+                synchronized(view.holder) {
+                    if (c != null) {
+                        view.timeDelta = (System.currentTimeMillis() - time).toFloat()
+                        time = System.currentTimeMillis()
+                        view.onDraw(c)
+                    }
+                }
+
             } finally {
+                if (c != null) {
+                    view.holder.unlockCanvasAndPost(c)
+                }
             }
 
             var sleep = ticks - (System.currentTimeMillis() - start)
