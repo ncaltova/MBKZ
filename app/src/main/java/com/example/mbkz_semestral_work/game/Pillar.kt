@@ -4,8 +4,12 @@ import android.graphics.RectF
 
 import com.example.mbkz_semestral_work.utils.Position
 
-class Pillar(val position: Position, private val width: Float, var height: Float) {
-    private val verticalGap : Float = 400f
+class Pillar(
+    val position: Position,
+    private val width: Float,
+    var height: Float,
+    var visited: Boolean) {
+    private val verticalGap : Float = 600f
 
     fun getBottomBoundingRect() = RectF(
         position.x, position.y, position.x + width, position.y + height

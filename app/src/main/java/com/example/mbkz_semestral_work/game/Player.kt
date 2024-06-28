@@ -13,26 +13,17 @@ class Player(
      */
     val position: Position,
 
-    /**
-     * Player mass
-     */
-    private val mass: Float,
-
     ) {
+
     /**
      * Player hitbox (radius)
      */
     private val hitbox = 100f
 
     /**
-     * Player speed up
+     * Player speed
      */
-    private val speedUp: Position = Position(0f, 5f)
-
-    /**
-     * Player speed down
-     */
-    private val speedDown: Position = Position(0f, 0.05f)
+    private val speed: Position = Position(0f, 0.05f)
 
     val boundingBox
         get() = RectF(
@@ -43,56 +34,27 @@ class Player(
         )
 
     /**
-     * Calculates player acceleration based on base entity
+     * Calculates current player speed given current time delta.
+     * Calculates change for only half of time delta for smoother animation.
      */
-    private fun getAcceleration(base: Entity, gravityConst: Float): Position {
-        val distanceX: Float = base.position.x - this.position.x
-        val distanceY: Float = base.position.y - this.position.y
-
-        val distance = sqrt(distanceX.pow(2) + distanceY.pow(2))
-
-        return Position(
-            (gravityConst * this.mass * base.mass * distanceX) / distance.pow(3),
-            (gravityConst * this.mass * base.mass * distanceY) / distance.pow(3)
-        )
+    fun updateSpeedDown(timeDelta: Float, gravityConst: Float) {
+        speed.y += 0.5F * timeDelta * gravityConst
     }
 
     /**
      * Calculates current player speed given current time delta.
      * Calculates change for only half of time delta for smoother animation.
      */
-    fun updateSpeedDown(timeDelta: Float, base: Entity, gravityConst: Float) {
-        val acceleration = getAcceleration(base, gravityConst)
-
-        speedDown.x += 0.5F * timeDelta * acceleration.x
-        speedDown.y += 0.5F * timeDelta * acceleration.y
+    fun updateSpeedUp() {
+        speed.y = -1.25f
     }
 
     /**
-     * Calculates current player speed given current time delta.
-     * Calculates change for only half of time delta for smoother animation.
+     * Move player according to the given time delta
      */
-    fun updateSpeedUp(timeDelta: Float, base: Entity, gravityConst: Float) {
-        val acceleration = getAcceleration(base, gravityConst)
-
-        speedDown.x -= 0.5F * timeDelta * acceleration.x
-        speedDown.y -= 0.5F * timeDelta * acceleration.y
-    }
-
-    /**
-     * Move player according to the given base entity
-     */
-    fun movePlayerDown(timeDelta: Float) {
-        this.position.x += timeDelta * this.speedDown.x
-        this.position.y += 2 * timeDelta * this.speedDown.y
-    }
-
-    /**
-     * Move player according to the given base entity
-     */
-    fun movePlayerUp(timeDelta: Float) {
-        this.position.x -= timeDelta * this.speedUp.x
-        this.position.y -= timeDelta * this.speedUp.y
+    fun movePlayer(timeDelta: Float) {
+        this.position.x += timeDelta * this.speed.x
+        this.position.y += timeDelta * this.speed.y
     }
 
     /**

@@ -1,19 +1,15 @@
 package com.example.mbkz_semestral_work.game
 
-import com.example.mbkz_semestral_work.R
-import android.content.Context
-import android.graphics.drawable.Drawable
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
-import androidx.core.content.ContextCompat
+import android.util.Log
+import androidx.compose.material3.Text
 import com.example.mbkz_semestral_work.GameView
-import com.example.mbkz_semestral_work.utils.Entity
 import com.example.mbkz_semestral_work.utils.InputProcessor
 import com.example.mbkz_semestral_work.utils.InputType
 import com.example.mbkz_semestral_work.utils.Position
-import kotlin.math.ln1p
+import kotlin.math.log
 
 
 class Game (
@@ -24,42 +20,35 @@ class Game (
     /**
      * Parent view width
      */
-    private val screenWidth: Float
+    // init screen size
+    private val screenWidth: Float = this.gameView.width.toFloat()
 
     /**
      * Parent view height
      */
-    private val screenHeight: Float
+    private val screenHeight: Float = this.gameView.height.toFloat()
 
     /**
      * Gravitational constant
      */
-    private val gravity : Float = 0.05F
+    private val gravity : Float = 0.005F
 
     /**
      * Instance of player
      */
-    private val player: Player
 
-    /**
-     * Instance of sky
-     */
-    private val sky: Entity
-
-    /**
-     * Instance of ground
-     */
-    private val ground: Entity
+    // init player
+    private val player: Player = Player(Position(screenWidth/2, screenHeight/2))
 
     /**
      * Gap between pillars
      */
-    private val pillarGap: Float = 500f
+    private val pillarGap: Float = 800f
 
     /**
      * Speed for moving game over the x axis
      */
-    private var gameSpeed : Float = 0.05F
+    private var gameSpeed : Float = 0.25F
 
     /**
      * Flag for game over
@@ -77,25 +66,15 @@ class Game (
     private val pillars : MutableList<Pillar> = mutableListOf()
 
     init {
-        // init screen size
-        this.screenWidth = this.gameView.width.toFloat()
-        this.screenHeight = this.gameView.height.toFloat()
-
-        // init player
-        this.player = Player(Position(screenWidth/2, screenHeight/2), 5.0F)
-
-        // init game world
-        this.sky = Entity(Position(screenWidth/2, 0.0F), 2.0F)
-        this.ground = Entity(Position(screenWidth/2, screenHeight), 15.0F)
 
         // init pillars
-        var pillarX = 3*(screenWidth/4)
+        var pillarX = 19*(screenWidth/20)
 
         for (i in 1..20) {
             val height = ((screenHeight/4).toInt()..(3*(screenHeight/4).toInt()))
                 .random().toFloat()
 
-            pillars.add(Pillar(Position(pillarX, screenHeight - height), 200f, height))
+            pillars.add(Pillar(Position(pillarX, screenHeight - height), 200f, height, false))
 
             pillarX += pillarGap
         }
@@ -104,36 +83,38 @@ class Game (
     /**
      * Updates player speed according to given timeDelta
      */
-    private fun updatePlayerSpeedUp(timeDelta: Float) {
-        player.updateSpeedUp(timeDelta, sky, gravity)
+    private fun updatePlayerSpeedUp() {
+        player.updateSpeedUp()
     }
 
     /**
      * Updates player speed according to given timeDelta
      */
     private fun updatePlayerSpeedDown(timeDelta: Float) {
-        player.updateSpeedDown(timeDelta, ground, gravity)
+        player.updateSpeedDown(timeDelta, gravity)
     }
 
     private fun movePillars(timeDelta: Float) {
         pillars.forEach{
             it.position.x -= timeDelta * this.gameSpeed
 
-            if (!player.wasPlayerHit(it) && it.position.x < player.position.x) {
+            if (!player.wasPlayerHit(it) && it.position.x < player.position.x && !it.visited) {
                 score++
+                it.visited = true
             }
         }
 
-        // If frist pillar is of screen -> add him at the end
+        // If first pillar is of screen -> add him at the end
         if (pillars.first().getBottomBoundingRect().right <= 0) {
             val shift = pillars.removeAt(0)
 
-            var height = ((screenHeight/3).toInt()..(3*(screenHeight/4))
+            val height = ((screenHeight/3).toInt()..(3*(screenHeight/4))
                 .toInt()).random().toFloat()
 
             shift.position.x = pillars.last().position.x + pillarGap
             shift.position.y = screenHeight - height
             shift.height = height
+            shift.visited = false
 
             pillars.add(shift)
         }
@@ -143,7 +124,7 @@ class Game (
      * Draws current state of game on screen
      */
     fun draw(canvas: Canvas)  {
-        canvas.drawColor(Color.WHITE)
+        canvas.drawColor(Color.CYAN)
 
         val p = Paint()
         p.color = Color.RED
@@ -154,6 +135,12 @@ class Game (
             canvas.drawRect(it.getTopBoundingRect(), p)
             canvas.drawRect(it.getBottomBoundingRect(), p)
         }
+
+        p.color = Color.WHITE;
+        p.textSize = 100f;
+        val text = "Score: ${this.score}"
+        val width = p.measureText(text)
+        canvas.drawText(text, screenWidth/2 - width/2, 110f, p);
 
 //        val d  = ContextCompat.getDrawable(this.gameView.context, R.drawable.pixel_cat)
 
@@ -183,10 +170,10 @@ class Game (
 
         // Move player accordingly
         if (input.isNotEmpty()) {
-            this.updatePlayerSpeedUp(timeDelta)
+            this.updatePlayerSpeedUp()
 
             input.forEach { _ ->
-                this.player.movePlayerUp(timeDelta)
+                this.player.movePlayer(timeDelta)
 
                 if (this.wasPlayerHit()) {
                     val score = this.getScore()
@@ -196,11 +183,11 @@ class Game (
                 }
             }
 
-            this.updatePlayerSpeedUp(timeDelta)
+            this.updatePlayerSpeedUp()
         } else {
             this.updatePlayerSpeedDown(timeDelta)
 
-            this.player.movePlayerDown(timeDelta)
+            this.player.movePlayer(timeDelta)
 
             if (this.wasPlayerHit()) {
                 val score = this.getScore()
@@ -209,7 +196,7 @@ class Game (
                 return Pair(false, score)
             }
 
-            this.updatePlayerSpeedUp(timeDelta)
+            this.updatePlayerSpeedDown(timeDelta)
         }
 
         return Pair(true, this.getScore())
@@ -223,8 +210,8 @@ class Game (
             if (this.player.wasPlayerHit(it)) return true
         }
 
-        return this.player.position.y + this.player.getHitBox() >= this.ground.position.y ||
-                this.player.position.y - this.player.getHitBox() <= this.sky.position.y
+        return this.player.position.y + this.player.getHitBox() >= this.screenHeight ||
+                this.player.position.y - this.player.getHitBox() <= 0f
     }
 
     /**
