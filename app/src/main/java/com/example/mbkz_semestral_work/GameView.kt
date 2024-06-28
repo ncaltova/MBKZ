@@ -109,11 +109,15 @@ class GameView(
      */
     private fun chceckState(result : Pair<Boolean, Int>?) {
         if (result?.first == false && game?.over == false) {
-            cacheHighScore(result.second)
             game?.over = true
-            val newGame = Intent(context, MainMenu::class.java)
-            this.context.startActivity(newGame)
         }
+    }
+
+    fun exit(score : Int) {
+        cacheHighScore(score)
+        game?.over = true
+        val newGame = Intent(context, MainMenu::class.java)
+        this.context.startActivity(newGame)
     }
 
     fun cacheHighScore(score: Int?) {

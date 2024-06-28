@@ -124,23 +124,31 @@ class Game (
      * Draws current state of game on screen
      */
     fun draw(canvas: Canvas)  {
-        canvas.drawColor(Color.CYAN)
-
+        canvas.drawColor(Color.parseColor("#8ACFF4"))
         val p = Paint()
-        p.color = Color.RED
-        canvas.drawCircle(player.position.x, player.position.y, player.getHitBox(), p)
 
-        p.color = Color.GREEN
-        this.pillars.forEach{
-            canvas.drawRect(it.getTopBoundingRect(), p)
-            canvas.drawRect(it.getBottomBoundingRect(), p)
+        if (this.over) {
+            val overText = "GAME OVER!"
+            val scoreText = "Score: ${this.score}"
+            p.textSize = 200f;
+            var width = p.measureText(overText)
+            canvas.drawText(overText, screenWidth/2 - width/2, screenHeight/2 - 100f, p);
+        } else {
+            p.color = Color.RED
+            canvas.drawCircle(player.position.x, player.position.y, player.size, p)
+
+            p.color = Color.GREEN
+            this.pillars.forEach{
+                canvas.drawRect(it.getTopBoundingRect(), p)
+                canvas.drawRect(it.getBottomBoundingRect(), p)
+            }
+
+            p.color = Color.WHITE;
+            p.textSize = 100f;
+            val text = "Score: ${this.score}"
+            val width = p.measureText(text)
+            canvas.drawText(text, screenWidth/2 - width/2, 110f, p);
         }
-
-        p.color = Color.WHITE;
-        p.textSize = 100f;
-        val text = "Score: ${this.score}"
-        val width = p.measureText(text)
-        canvas.drawText(text, screenWidth/2 - width/2, 110f, p);
 
 //        val d  = ContextCompat.getDrawable(this.gameView.context, R.drawable.pixel_cat)
 
@@ -158,11 +166,15 @@ class Game (
      */
     fun updateGame(timeDelta: Float) : Pair<Boolean, Int>? {
 
-        if (this.over) return null
-
         // Get all current inputs
         val input = inputProcessor.getPendingInput().filter {
             it.type == InputType.CLICK
+        }
+
+        if (this.over && input.isNotEmpty()) {
+            val currentScore = this.score
+            this.gameView.exit(currentScore)
+            this.score = 0
         }
 
         // Move pillars
@@ -176,9 +188,6 @@ class Game (
                 this.player.movePlayer(timeDelta)
 
                 if (this.wasPlayerHit()) {
-                    val score = this.getScore()
-                    this.clearScore()
-
                     return Pair(false, score)
                 }
             }
@@ -190,9 +199,6 @@ class Game (
             this.player.movePlayer(timeDelta)
 
             if (this.wasPlayerHit()) {
-                val score = this.getScore()
-                this.clearScore()
-
                 return Pair(false, score)
             }
 

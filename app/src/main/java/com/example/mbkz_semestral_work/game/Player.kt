@@ -16,9 +16,14 @@ class Player(
     ) {
 
     /**
-     * Player hitbox (radius)
+     * Player hitbox (radius), little bit less than visual size
      */
-    private val hitbox = 100f
+    private val hitbox = 95f
+
+    /**
+     * Player visual size
+     */
+    val size = 100f
 
     /**
      * Player speed
