@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import com.example.mbkz_semestral_work.utils.GameState
 
 class MainMenu : AppCompatActivity() {
 
@@ -26,7 +25,7 @@ class MainMenu : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences("com.example.mbkz_semestral_work", MODE_PRIVATE)
         val highest = sharedPreferences.getInt("score", 0)
 
-        findViewById<TextView>(R.id.highScore).text = highest.toString()
+        findViewById<TextView>(R.id.highScore).text = "High score: $highest"
 
         super.onResume()
     }

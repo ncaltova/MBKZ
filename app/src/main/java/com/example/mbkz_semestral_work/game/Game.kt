@@ -3,6 +3,8 @@ package com.example.mbkz_semestral_work.game
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
+import androidx.compose.ui.graphics.Brush
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.example.mbkz_semestral_work.GameView
@@ -154,20 +156,13 @@ class Game (
      * Draws current state of game on screen
      */
     fun draw(canvas: Canvas)  {
-        val typeFace = ResourcesCompat.getFont(gameView.context, R.font.flappy_font)
-        canvas.drawColor(Color.parseColor("#bdf8ff"))
-        val p = Paint()
-        p.typeface = ResourcesCompat.getFont(gameView.context, R.font.flappy_font)
+        draw.drawBackground(canvas)
 
         draw.drawPlayer(player, canvas)
 
         draw.drawPillars(pillars, canvas, screenWidth)
 
-        p.color = Color.WHITE
-        p.textSize = 150f
-        val text = "${this.score}"
-        val width = p.measureText(text)
-        canvas.drawText(text, screenWidth/2 - width/2, 110f, p)
+        draw.drawScore(score, canvas)
 
         if (over)
             draw.drawPartialState("GAME OVER", canvas, screenWidth, screenHeight)

@@ -17,7 +17,7 @@ class Player(
     /**
      * Player hitbox (radius), little bit less than visual size
      */
-    val hitbox = 95f
+    val hitbox = 92f
 
     /**
      * Player visual size

@@ -2,6 +2,8 @@ package com.example.mbkz_semestral_work
 
 import android.annotation.SuppressLint
 import android.graphics.Canvas
+import android.graphics.PixelFormat
+import android.view.SurfaceHolder
 import java.lang.Exception
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -22,6 +24,10 @@ class GameLoop(private val view: GameView) : Thread("GameLoopThread ${Random.nex
         var c: Canvas? = null
 
         time = System.currentTimeMillis()
+
+        synchronized(view.holder) {
+            view.holder.setFormat(PixelFormat.RGB_565)
+        }
 
         while (running) {
             val start = System.currentTimeMillis()
