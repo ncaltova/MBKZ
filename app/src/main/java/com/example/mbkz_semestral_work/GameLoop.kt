@@ -3,7 +3,6 @@ package com.example.mbkz_semestral_work
 import android.annotation.SuppressLint
 import android.graphics.Canvas
 import android.graphics.PixelFormat
-import android.view.SurfaceHolder
 import java.lang.Exception
 import kotlin.math.roundToInt
 import kotlin.random.Random

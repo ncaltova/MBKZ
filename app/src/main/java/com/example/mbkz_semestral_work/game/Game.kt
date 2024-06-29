@@ -1,14 +1,7 @@
 package com.example.mbkz_semestral_work.game
 
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
-import androidx.compose.ui.graphics.Brush
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import com.example.mbkz_semestral_work.GameView
-import com.example.mbkz_semestral_work.R
 import com.example.mbkz_semestral_work.utils.Draw
 import com.example.mbkz_semestral_work.utils.GameState
 import com.example.mbkz_semestral_work.utils.InputProcessor
@@ -25,7 +18,6 @@ class Game (
     /**
      * Parent view width
      */
-    // init screen size
     private val screenWidth: Float = this.gameView.width.toFloat()
 
     /**
@@ -41,8 +33,6 @@ class Game (
     /**
      * Instance of player
      */
-
-    // init player
     var player: Player = Player(
         Position(screenWidth/2, screenHeight/2)
     )
@@ -99,7 +89,9 @@ class Game (
 
     init {
 
-        // init pillars
+        /*
+            Initialize pillars
+        */
         var pillarX = 19*(screenWidth/20)
 
         for (i in 1..20) {
@@ -136,7 +128,7 @@ class Game (
             }
         }
 
-        // If first pillar is of screen -> add him at the end
+        // If first pillar is of screen -> add it at the end
         if (pillars.first().bottomBoundingRect.right <= 0) {
             val shift = pillars.removeAt(0)
 
@@ -174,7 +166,7 @@ class Game (
     /**
      * Updates game according to given time delta
      */
-    fun updateGame(timeDelta: Float) : Pair<Boolean, Int>? {
+    fun updateGame(timeDelta: Float) {
 
         // Get all current inputs
         val input = inputProcessor.pendingInput.filter {
@@ -184,12 +176,12 @@ class Game (
         if (over && input.isNotEmpty()) {
             gameView.exit()
             score = 0
-            return null
+            return
         }
         else if (pause && input.isNotEmpty()) {
             pause = false
         } else if (over || pause) {
-            return null
+            return
         }
 
         // Move pillars
@@ -204,7 +196,7 @@ class Game (
 
                 if (wasPlayerHit()) {
                     over = true
-                    return Pair(false, score)
+                    return
                 }
             }
 
@@ -216,13 +208,11 @@ class Game (
 
             if (wasPlayerHit()) {
                 over = true
-                return Pair(false, score)
+                return
             }
 
             updatePlayerSpeedDown(timeDelta)
         }
-
-        return Pair(true, score)
     }
 
     /**

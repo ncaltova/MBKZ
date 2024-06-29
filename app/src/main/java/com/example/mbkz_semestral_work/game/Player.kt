@@ -22,12 +22,12 @@ class Player(
     /**
      * Player visual size
      */
-    val size = 100f
+    private val size = 100f
 
     /**
      * Player speed
      */
-    val speed: Position = Position(0f, 0.05f)
+    private val speed: Position = Position(0f, 0.05f)
 
     val drawBox
         get() = Rect(
@@ -37,7 +37,7 @@ class Player(
         (position.y + size).toInt()
     )
 
-    val boundingBox
+    private val boundingBox
         get() = RectF(
             position.x - hitbox,
             position.y - hitbox,
