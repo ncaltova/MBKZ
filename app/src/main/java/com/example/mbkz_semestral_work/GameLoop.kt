@@ -2,11 +2,7 @@ package com.example.mbkz_semestral_work
 
 import android.annotation.SuppressLint
 import android.graphics.Canvas
-import android.view.MotionEvent
-import com.example.mbkz_semestral_work.utils.InputProcessor
 import java.lang.Exception
-import java.util.LinkedList
-import java.util.Queue
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
@@ -16,9 +12,7 @@ class GameLoop(private val view: GameView) : Thread("GameLoopThread ${Random.nex
 
     var running: Boolean = false
 
-    var time: Long = 0
-
-    private var score = 0
+    private var time: Long = 0
 
     @SuppressLint("WrongCall")
     override fun run() {

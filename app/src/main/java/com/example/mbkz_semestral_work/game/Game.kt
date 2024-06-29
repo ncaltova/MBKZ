@@ -3,13 +3,16 @@ package com.example.mbkz_semestral_work.game
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.util.Log
-import androidx.compose.material3.Text
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import com.example.mbkz_semestral_work.GameView
+import com.example.mbkz_semestral_work.R
+import com.example.mbkz_semestral_work.utils.Draw
+import com.example.mbkz_semestral_work.utils.GameState
 import com.example.mbkz_semestral_work.utils.InputProcessor
 import com.example.mbkz_semestral_work.utils.InputType
 import com.example.mbkz_semestral_work.utils.Position
-import kotlin.math.log
+import java.io.Serializable
 
 
 class Game (
@@ -38,7 +41,9 @@ class Game (
      */
 
     // init player
-    private val player: Player = Player(Position(screenWidth/2, screenHeight/2))
+    var player: Player = Player(
+        Position(screenWidth/2, screenHeight/2)
+    )
 
     /**
      * Gap between pillars
@@ -48,7 +53,25 @@ class Game (
     /**
      * Speed for moving game over the x axis
      */
-    private var gameSpeed : Float = 0.25F
+    private val gameSpeed : Float = 0.25F
+
+    /**
+     * Draws current state od game
+     */
+    private val draw : Draw = Draw(this.gameView)
+
+    /**
+     * Returns current state of game
+     */
+    val gameState
+        get() = GameState(
+            player,
+            over,
+            score,
+            pillars as Serializable,
+            screenWidth,
+            screenHeight
+        )
 
     /**
      * Flag for game over
@@ -56,14 +79,21 @@ class Game (
     var over : Boolean = false
 
     /**
+     * Flag for game pause
+     */
+    var pause : Boolean = false
+
+    /**
      * Game score
      */
-    private var score: Int = 0
+    var score: Int = 0
 
     /**
      * List of pillar in game
      */
-    private val pillars : MutableList<Pillar> = mutableListOf()
+    var pillars : MutableList<Pillar> = mutableListOf()
+
+
 
     init {
 
@@ -105,7 +135,7 @@ class Game (
         }
 
         // If first pillar is of screen -> add him at the end
-        if (pillars.first().getBottomBoundingRect().right <= 0) {
+        if (pillars.first().bottomBoundingRect.right <= 0) {
             val shift = pillars.removeAt(0)
 
             val height = ((screenHeight/3).toInt()..(3*(screenHeight/4))
@@ -124,41 +154,26 @@ class Game (
      * Draws current state of game on screen
      */
     fun draw(canvas: Canvas)  {
-        canvas.drawColor(Color.parseColor("#8ACFF4"))
+        val typeFace = ResourcesCompat.getFont(gameView.context, R.font.flappy_font)
+        canvas.drawColor(Color.parseColor("#bdf8ff"))
         val p = Paint()
+        p.typeface = ResourcesCompat.getFont(gameView.context, R.font.flappy_font)
 
-        if (this.over) {
-            val overText = "GAME OVER!"
-            val scoreText = "Score: ${this.score}"
-            p.textSize = 200f;
-            var width = p.measureText(overText)
-            canvas.drawText(overText, screenWidth/2 - width/2, screenHeight/2 - 100f, p);
-        } else {
-            p.color = Color.RED
-            canvas.drawCircle(player.position.x, player.position.y, player.size, p)
+        draw.drawPlayer(player, canvas)
 
-            p.color = Color.GREEN
-            this.pillars.forEach{
-                canvas.drawRect(it.getTopBoundingRect(), p)
-                canvas.drawRect(it.getBottomBoundingRect(), p)
-            }
+        draw.drawPillars(pillars, canvas, screenWidth)
 
-            p.color = Color.WHITE;
-            p.textSize = 100f;
-            val text = "Score: ${this.score}"
-            val width = p.measureText(text)
-            canvas.drawText(text, screenWidth/2 - width/2, 110f, p);
-        }
+        p.color = Color.WHITE
+        p.textSize = 150f
+        val text = "${this.score}"
+        val width = p.measureText(text)
+        canvas.drawText(text, screenWidth/2 - width/2, 110f, p)
 
-//        val d  = ContextCompat.getDrawable(this.gameView.context, R.drawable.pixel_cat)
+        if (over)
+            draw.drawPartialState("GAME OVER", canvas, screenWidth, screenHeight)
 
-//        d?.bounds = Rect(
-//            player.position.x.toInt(),
-//            player.position.y.toInt(),
-//            (player.position.x+player.getHitBox()).toInt(),
-//            (player.position.y+player.getHitBox()).toInt())
-//
-//        d?.draw(canvas)
+        if (pause)
+            draw.drawPartialState("PAUSE", canvas, screenWidth, screenHeight)
     }
 
     /**
@@ -167,70 +182,63 @@ class Game (
     fun updateGame(timeDelta: Float) : Pair<Boolean, Int>? {
 
         // Get all current inputs
-        val input = inputProcessor.getPendingInput().filter {
+        val input = inputProcessor.pendingInput.filter {
             it.type == InputType.CLICK
         }
 
-        if (this.over && input.isNotEmpty()) {
-            val currentScore = this.score
-            this.gameView.exit(currentScore)
-            this.score = 0
+        if (over && input.isNotEmpty()) {
+            gameView.exit()
+            score = 0
+            return null
+        }
+        else if (pause && input.isNotEmpty()) {
+            pause = false
+        } else if (over || pause) {
+            return null
         }
 
         // Move pillars
-        this.movePillars(timeDelta)
+        movePillars(timeDelta)
 
         // Move player accordingly
         if (input.isNotEmpty()) {
-            this.updatePlayerSpeedUp()
+            updatePlayerSpeedUp()
 
             input.forEach { _ ->
-                this.player.movePlayer(timeDelta)
+                player.movePlayer(timeDelta)
 
-                if (this.wasPlayerHit()) {
+                if (wasPlayerHit()) {
+                    over = true
                     return Pair(false, score)
                 }
             }
 
-            this.updatePlayerSpeedUp()
+            updatePlayerSpeedUp()
         } else {
-            this.updatePlayerSpeedDown(timeDelta)
+            updatePlayerSpeedDown(timeDelta)
 
-            this.player.movePlayer(timeDelta)
+            player.movePlayer(timeDelta)
 
-            if (this.wasPlayerHit()) {
+            if (wasPlayerHit()) {
+                over = true
                 return Pair(false, score)
             }
 
-            this.updatePlayerSpeedDown(timeDelta)
+            updatePlayerSpeedDown(timeDelta)
         }
 
-        return Pair(true, this.getScore())
+        return Pair(true, score)
     }
 
     /**
      * Checks whether player was hit by any pillar
      */
     private fun wasPlayerHit() : Boolean {
-        this.pillars.forEach {
-            if (this.player.wasPlayerHit(it)) return true
+        pillars.forEach {
+            if (player.wasPlayerHit(it)) return true
         }
 
-        return this.player.position.y + this.player.getHitBox() >= this.screenHeight ||
-                this.player.position.y - this.player.getHitBox() <= 0f
-    }
-
-    /**
-     * Clears game score
-     */
-    fun clearScore() {
-        this.score = 0
-    }
-
-    /**
-     * Returns current score
-     */
-    fun getScore() : Int {
-        return this.score
+        return player.position.y + player.hitbox >= screenHeight ||
+                player.position.y - player.hitbox <= 0f
     }
 }

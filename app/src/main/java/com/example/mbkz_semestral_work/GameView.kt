@@ -4,16 +4,16 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Canvas
-import android.graphics.Color
-import android.icu.text.ListFormatter.Width
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import com.example.mbkz_semestral_work.game.Game
-import com.example.mbkz_semestral_work.utils.Input
+import com.example.mbkz_semestral_work.game.Pillar
+import com.example.mbkz_semestral_work.utils.GameState
 import com.example.mbkz_semestral_work.utils.InputProcessor
-import com.example.mbkz_semestral_work.utils.InputType
+import com.example.mbkz_semestral_work.utils.Position
+import kotlin.math.abs
 
 class GameView(
     /**
@@ -26,7 +26,7 @@ class GameView(
     /**
      * Time delta, set by game loop
      */
-    var timeDelta : Float = 0f
+    var timeDelta = 0f
 
     /**
      * Input processor
@@ -39,9 +39,15 @@ class GameView(
     private var gameLoop = GameLoop(this)
 
     /**
+     * State of game, if not null game will return to given state
+     */
+    var gameState : GameState? = null
+
+    /**
      * Game logic
      */
     var game : Game? = null
+        private set
 
     init {
         holder.addCallback(object : SurfaceHolder.Callback {
@@ -77,7 +83,7 @@ class GameView(
      * Registers touch event to input processor
      */
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        inputProcessor.addInput(event)
+        inputProcessor.inputQueue.offer(event)
         return performClick()
     }
 
@@ -90,43 +96,58 @@ class GameView(
         super.onLayout(changed, left, top, right, bottom)
 
         if (game == null) {
-            this.game = Game(this, inputProcessor)
+            game = Game(this, inputProcessor)
+
+            if (gameState != null) {
+                game?.over = gameState!!.over
+                game?.score = gameState!!.score
+                game?.pause = !gameState!!.over
+
+                val scale = Position(
+                    this.width / gameState!!.width,
+                    this.height / gameState!!.height
+                )
+
+                val pillars = gameState!!.pillars as MutableList<Pillar>
+
+                pillars.forEach{
+                    it.height *= scale.y
+                    it.position.x *= scale.x
+                    it.position.y *= scale.y
+                }
+
+                gameState!!.player.position.x =
+                    if (abs(gameState!!.player.position.x - 0f) < 0.0001f) 0f else gameState!!.player.position.x * scale.x
+
+                gameState!!.player.position.y *= scale.y
+
+                game?.pillars = pillars
+                game?.player = gameState!!.player
+            }
         }
     }
 
     public override fun onDraw(canvas: Canvas) {
         if (game == null) return
 
-        val result = game?.updateGame(timeDelta)
+        game?.updateGame(timeDelta)
 
         game?.draw(canvas)
-
-        chceckState(result)
     }
 
-    /**
-     * Returns to main menu and saves high score
-     */
-    private fun chceckState(result : Pair<Boolean, Int>?) {
-        if (result?.first == false && game?.over == false) {
-            game?.over = true
-        }
-    }
-
-    fun exit(score : Int) {
-        cacheHighScore(score)
-        game?.over = true
+    fun exit() {
+        cacheHighScore()
         val newGame = Intent(context, MainMenu::class.java)
         this.context.startActivity(newGame)
     }
 
-    fun cacheHighScore(score: Int?) {
-        if (score == null) return
+    fun cacheHighScore() {
+        if (game == null) return
 
         val sharedPreferences = context.getSharedPreferences("com.example.mbkz_semestral_work", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         val highest = sharedPreferences.getInt("score", 0)
-        editor.putInt("score", if (highest < score) score else highest)
-        editor.apply();
+        editor.putInt("score", if (highest < game!!.score) game!!.score else highest)
+        editor.apply()
     }
 }

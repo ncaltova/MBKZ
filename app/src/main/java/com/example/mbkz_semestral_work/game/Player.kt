@@ -1,10 +1,9 @@
 package com.example.mbkz_semestral_work.game
 
+import android.graphics.Rect
 import android.graphics.RectF
-import com.example.mbkz_semestral_work.utils.Entity
 import com.example.mbkz_semestral_work.utils.Position
-import kotlin.math.pow
-import kotlin.math.sqrt
+import java.io.Serializable
 
 class Player(
 
@@ -13,12 +12,12 @@ class Player(
      */
     val position: Position,
 
-    ) {
+    ) : Serializable {
 
     /**
      * Player hitbox (radius), little bit less than visual size
      */
-    private val hitbox = 95f
+    val hitbox = 95f
 
     /**
      * Player visual size
@@ -28,7 +27,15 @@ class Player(
     /**
      * Player speed
      */
-    private val speed: Position = Position(0f, 0.05f)
+    val speed: Position = Position(0f, 0.05f)
+
+    val drawBox
+        get() = Rect(
+        (position.x - size).toInt(),
+        (position.y - size).toInt(),
+        (position.x + size).toInt(),
+        (position.y + size).toInt()
+    )
 
     val boundingBox
         get() = RectF(
@@ -58,7 +65,6 @@ class Player(
      * Move player according to the given time delta
      */
     fun movePlayer(timeDelta: Float) {
-        this.position.x += timeDelta * this.speed.x
         this.position.y += timeDelta * this.speed.y
     }
 
@@ -66,15 +72,8 @@ class Player(
      * Checks whether player hit pillar
      */
     fun wasPlayerHit(pillar: Pillar): Boolean {
-        val bottomBoundingRect = pillar.getBottomBoundingRect()
-        val topBoundingRect = pillar.getTopBoundingRect()
+        return pillar.topBoundingRect.intersect(boundingBox)
+                || pillar.bottomBoundingRect.intersect(boundingBox)
 
-        return topBoundingRect.intersect(boundingBox)
-                || bottomBoundingRect.intersect(boundingBox)
-
-    }
-
-    fun getHitBox(): Float {
-        return hitbox
     }
 }
