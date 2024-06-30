@@ -1,12 +1,9 @@
 package com.example.mbkz_semestral_work.game
 
 import android.graphics.Canvas
-import com.example.mbkz_semestral_work.GameView
 import com.example.mbkz_semestral_work.utils.Draw
-import com.example.mbkz_semestral_work.utils.GameState
 import com.example.mbkz_semestral_work.utils.InputProcessor
 import com.example.mbkz_semestral_work.utils.InputType
-import com.example.mbkz_semestral_work.utils.Position
 import java.io.Serializable
 
 

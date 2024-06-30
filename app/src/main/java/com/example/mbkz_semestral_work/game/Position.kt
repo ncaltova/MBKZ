@@ -1,4 +1,4 @@
-package com.example.mbkz_semestral_work.utils
+package com.example.mbkz_semestral_work.game
 
 import java.io.Serializable
 

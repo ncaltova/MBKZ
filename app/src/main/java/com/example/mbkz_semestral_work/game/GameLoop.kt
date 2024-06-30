@@ -1,4 +1,4 @@
-package com.example.mbkz_semestral_work
+package com.example.mbkz_semestral_work.game
 
 import android.annotation.SuppressLint
 import android.graphics.Canvas
@@ -18,7 +18,7 @@ class GameLoop(private val view: GameView) : Thread("GameLoopThread ${Random.nex
     @SuppressLint("WrongCall")
     override fun run() {
         val fps = view.context.display?.refreshRate
-        val ticks = if (fps == null) 1000/DEFAULT_FPS else 1000/fps.roundToInt()
+        val ticks = if (fps == null) 1000/ DEFAULT_FPS else 1000/fps.roundToInt()
 
         var c: Canvas? = null
 

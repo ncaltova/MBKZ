@@ -1,6 +1,5 @@
-package com.example.mbkz_semestral_work.utils
+package com.example.mbkz_semestral_work.game
 
-import com.example.mbkz_semestral_work.game.Player
 import java.io.Serializable
 
 class GameState(

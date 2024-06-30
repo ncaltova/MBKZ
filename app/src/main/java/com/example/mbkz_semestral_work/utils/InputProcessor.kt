@@ -1,8 +1,8 @@
 package com.example.mbkz_semestral_work.utils
 
 import android.view.MotionEvent
-import java.util.LinkedList
-import java.util.Queue
+import java.util.concurrent.BlockingDeque
+import java.util.concurrent.LinkedBlockingDeque
 import kotlin.math.hypot
 
 class InputProcessor {
@@ -26,7 +26,7 @@ class InputProcessor {
     /**
      * Queue holding all unprocessed events
      */
-    val inputQueue: Queue<MotionEvent> = LinkedList()
+    val inputQueue: BlockingDeque<MotionEvent> = LinkedBlockingDeque(150)
 
     private val input : Input?
         get() {

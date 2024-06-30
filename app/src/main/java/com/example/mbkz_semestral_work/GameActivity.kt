@@ -2,7 +2,8 @@ package com.example.mbkz_semestral_work
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mbkz_semestral_work.utils.GameState
+import com.example.mbkz_semestral_work.game.GameState
+import com.example.mbkz_semestral_work.game.GameView
 
 class GameActivity : AppCompatActivity() {
 
@@ -38,7 +39,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     /**
-     * Save game state on application pause
+     * Pause game
      */
     override fun onPause() {
         super.onPause()

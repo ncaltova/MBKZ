@@ -2,7 +2,6 @@ package com.example.mbkz_semestral_work.game
 
 import android.graphics.Rect
 import android.graphics.RectF
-import com.example.mbkz_semestral_work.utils.Position
 import java.io.Serializable
 
 class Player(

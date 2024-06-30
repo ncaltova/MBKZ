@@ -9,7 +9,7 @@ import android.graphics.drawable.GradientDrawable
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.example.mbkz_semestral_work.GameView
+import com.example.mbkz_semestral_work.game.GameView
 import com.example.mbkz_semestral_work.R
 import com.example.mbkz_semestral_work.game.Pillar
 import com.example.mbkz_semestral_work.game.Player

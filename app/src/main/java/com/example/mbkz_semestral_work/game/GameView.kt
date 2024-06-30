@@ -1,4 +1,4 @@
-package com.example.mbkz_semestral_work
+package com.example.mbkz_semestral_work.game
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,11 +8,8 @@ import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
-import com.example.mbkz_semestral_work.game.Game
-import com.example.mbkz_semestral_work.game.Pillar
-import com.example.mbkz_semestral_work.utils.GameState
+import com.example.mbkz_semestral_work.MainMenu
 import com.example.mbkz_semestral_work.utils.InputProcessor
-import com.example.mbkz_semestral_work.utils.Position
 import kotlin.math.abs
 
 class GameView(
